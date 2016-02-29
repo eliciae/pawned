@@ -21,7 +21,7 @@ class Pawned:
         :return:
         """
         if state is None:
-            self.gameState = State.State()
+            self.gameState = State.State(None, None)
         else:
             self.gameState = state
         self.display()
@@ -34,41 +34,57 @@ class Pawned:
         """
         return self.gameState
 
-    def validSpaces(self, state, player):
+    def validSpaces(self, state):
         """
-        returns a list of all possible spaces (row,col) to move from the current state
+        returns a list of tuples (the start and end coord pair) of tuples (the row and col values)
         """
         validSpaces = []
-        board = self.gameState.getBoard()
+        player = state.getPlayer()
+        board = state.getBoard()
         if player == "W":
-            currentLocations = zip(*np.where(self.gameState.getBoard() == "W"))
+            currentLocations = list(zip(*np.where(board == "w")))
             for coord in currentLocations:
                 # forward one
                 if board[coord[0]-1][coord[1]] == ".":
-                    validSpaces.append((coord[0]-1, coord[1]))
+                    validSpaces.append(((coord[0], coord[1]), (coord[0]-1, coord[1])))
                 # diagonal attack to right
                 if coord[1]+1 < 6:
                     if board[coord[0]-1][coord[1]+1] == "b":
-                        validSpaces.append((coord[0]-1, coord[1]+1))
+                        validSpaces.append(((coord[0], coord[1]), (coord[0]-1, coord[1]+1)))
                 # diagonal attack to left
                 if coord[1]-1 > -1:
                     if board[coord[0]-1][coord[1]-1] == "b":
-                        validSpaces.append((coord[0]-1, coord[1]-1))
+                        validSpaces.append(((coord[0], coord[1]), (coord[0]-1, coord[1]-1)))
         else:
-            currentLocations = zip(*np.where(self.gameState.getBoard() == "B"))
+            currentLocations = list(zip(*np.where(board == "b")))
             for coord in currentLocations:
                 # forward one
                 if board[coord[0]+1][coord[1]] == ".":
-                    validSpaces.append((coord[0]+1, coord[1]))
+                    validSpaces.append(((coord[0], coord[1]), (coord[0]+1, coord[1])))
                 # diagonal attack to right
                 if coord[1]+1 < 6:
                     if board[coord[0]+1][coord[1]+1] == "w":
-                        validSpaces.append((coord[0]-1, coord[1]+1))
+                        validSpaces.append(((coord[0], coord[1]), (coord[0]+1, coord[1]+1)))
                 # diagonal attack to left
                 if coord[1]-1 > -1:
                     if board[coord[0]+1][coord[1]-1] == "w":
-                        validSpaces.append((coord[0]-1, coord[1]-1))
+                        validSpaces.append(((coord[0], coord[1]), (coord[0]+1, coord[1]-1)))
+        return validSpaces
 
+
+    def move(self, who, where, state):
+        """
+        Create a new board with the given move.
+        :param where: Where the move was
+        :param who: who moved there
+        returns the resulting board of the given move
+        """
+        board = state.getBoard().copy()
+        # the coordinate you are moving to gets the value of the coordinate you are moving from
+        board[where[0]][where[1]] = board[who[0]][who[1]]
+        # set the value you are moving from to .
+        board[who[0]][who[1]] = "."
+        return board
 
 
 

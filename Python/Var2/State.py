@@ -1,18 +1,26 @@
+import numpy as np
+
 class State:
     board = None
     player = "W"
 
-    def __init__(self):
+    def __init__(self, board, player):
         # Creates a completely empty board
-        self.board = [["." for x in range(6)] for x in range(6)]
-        # adds pieces at start points
-        for i in range(6):
-            # black across top - [row][col]
-            self.board[0][i] = "b"
-            # white across bottom
-            self.board[5][i] = "w"
-        # makes white start
-        self.player = "W"
+        if board is None:
+            self.board = np.array([["." for x in range(6)] for x in range(6)], str)
+            # adds pieces at start points
+            for i in range(6):
+                # black across top - [row][col]
+                self.board[0][i] = "b"
+                # white across bottom
+                self.board[5][i] = "w"
+        else:
+            self.board = board
+        if player is None:
+            # makes white start
+            self.player = "W"
+        else:
+            self.player = player
 
     def getBoard(self):
         return self.board
