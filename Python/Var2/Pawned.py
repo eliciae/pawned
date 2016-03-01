@@ -1,4 +1,4 @@
-from a2.Python.Var2 import State
+from a2.Python.Var2.State import State
 import numpy as np
 
 tree = dict()
@@ -21,7 +21,7 @@ class Pawned:
         :return:
         """
         if state is None:
-            self.gameState = State.State(None, None)
+            self.gameState = State(None, None)
         else:
             self.gameState = state
         self.display()
@@ -71,6 +71,10 @@ class Pawned:
                         validSpaces.append(((coord[0], coord[1]), (coord[0]+1, coord[1]-1)))
         return validSpaces
 
+    def pieceLocations(self, board, color):
+        # get the piece type to look for and return all locations
+        return list(zip(*np.where(board == color)))
+
 
     def move(self, who, where, state):
         """
@@ -84,7 +88,8 @@ class Pawned:
         board[where[0]][where[1]] = board[who[0]][who[1]]
         # set the value you are moving from to .
         board[who[0]][who[1]] = "."
-        return board
+        state = State(board, self.togglePlayer(state.getPlayer()))
+        return state
 
 
 
@@ -102,20 +107,44 @@ class Pawned:
         return self.gameState in "AEFGHIJK"
 
 
+    def winFor(self, state, color):
+        """ *** needed for search ***
+        :param node: a game tree node with stored game state
+        :return: a boolean indicating if node is terminal
+        """
+        # if black is at the 5 row
+        if color == "b":
+            winRow = 5
+        else:
+            winRow = 0
+        for p in self.pieceLocations(state.getBoard(), color):
+            if p[0] == winRow:
+                return True
+        return False
+    
+
     def isTerminal(self):
         """ *** needed for search ***
         :param node: a game tree node with stored game state
         :return: a boolean indicating if node is terminal
         """
-        return self.gameState in "LMNOPQRSTUVWXY"
+        return self.winFor('b') or self.winFor('w') or (len(self.validSpaces()) == 0)
 
-    def successors(self):
+
+    def successors(self, state):
         """ *** needed for search ***
         :param node:  a game tree node with stored game state
-        :return: a list of game tree nodes that are the next possible states
+        :return: a list of move,state pairs that are the next possible states
         """
-        global tree
-        return [Pawned(c) for c in tree[self.gameState]]
+        spaces = self.validSpaces(state)
+        states = list(map(lambda v: self.move(v[0], v[1], state), spaces))
+        return states
+
+    def togglePlayer(self, player):
+        if player == "B":
+            return "W"
+        else:
+            return "B"
 
 
     def utility(self):
