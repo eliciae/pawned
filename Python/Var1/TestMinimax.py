@@ -6,6 +6,7 @@ a = TicTacToe(None)
 minimax(a)
 """
 from a2.Python.Var2 import Pawned
+import numpy as np
 from a2.Python.Var1.GameTreeSearch import minimax
 from a2.Python.Var2.State import State
 
@@ -35,6 +36,25 @@ print(state.getBoard())
 print(spaces)
 '''
 
+board = np.array([["." for x in range(6)] for x in range(6)], str)
+
+board[2][1] = "b"
+board[3][4] = "b"
+
+# board[0][2] = "w"
+board[3][1] = "w"
+board[4][4] = "w"
+# board[][] = "w"
+
+state = State(board, None)
+a = Pawned.Pawned(state)
+print(a.isTerminal(a.gameState))
+print(a.winFor(state, "w"))
+print(a.isMinNode(state))
+
+
+
+'''
 a = Pawned.Pawned(None)
 print("successor start!!")
 stateList = a.successors(a.gameState)
@@ -57,3 +77,4 @@ print("More states and should terminate")
 for s in more:
     print(s.getBoard())
     print(a.isTerminal(s))
+'''

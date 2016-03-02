@@ -2,6 +2,8 @@ from a2.Python.Var2.State import State
 import numpy as np
 
 tree = dict()
+AI = "B"
+human = "W"
 
 
 class Pawned:
@@ -88,23 +90,21 @@ class Pawned:
         board[where[0]][where[1]] = board[who[0]][who[1]]
         # set the value you are moving from to .
         board[who[0]][who[1]] = "."
-        state = State(board, self.togglePlayer(state.getPlayer()))
-        return state
+        return State(board, self.togglePlayer(state.getPlayer()))
 
 
-
-    def isMinNode(self):
+    def isMinNode(self, state):
         """ *** needed for search ***
         :return: True if it's Min's turn to play
         """
-        return self.gameState in "BCD"
+        return state.getPlayer() == human
 
 
-    def isMaxNode(self):
+    def isMaxNode(self, state):
         """ *** needed for search ***
         :return: True if it's Max's turn to play
         """
-        return self.gameState in "AEFGHIJK"
+        return state.getPlayer() == AI
 
 
     def winFor(self, state, color):
@@ -121,14 +121,14 @@ class Pawned:
             if p[0] == winRow:
                 return True
         return False
-    
 
-    def isTerminal(self):
+
+    def isTerminal(self, state):
         """ *** needed for search ***
         :param node: a game tree node with stored game state
         :return: a boolean indicating if node is terminal
         """
-        return self.winFor('b') or self.winFor('w') or (len(self.validSpaces()) == 0)
+        return self.winFor(state, 'b') or self.winFor(state, 'w') or (len(self.validSpaces(state)) == 0)
 
 
     def successors(self, state):
@@ -147,12 +147,16 @@ class Pawned:
             return "B"
 
 
-    def utility(self):
+    def utility(self, state):
         """ *** needed for search ***
         :return: 1 if win for X, -1 for win for O, 0 for draw
         """
-        global tree
-        return tree[self.gameState]
+        if self.winFor(state, "w"):
+            return 1
+        if self.winFor(state, "b"):
+            return -1
+        if len(self.validSpaces(state)) == 0:
+            return 0
 
 
     # all remaining methods are to assist in the calculatiosn
