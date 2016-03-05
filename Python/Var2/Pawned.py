@@ -22,19 +22,19 @@ class Pawned:
         :param player: whose turn it is to play in the current state
         :return:
         """
+
+        self.haspassed = 0
         if state is None:
             self.state = State(None, None)
         else:
             self.state = state
-
-
 
     def str(self):
         """ *** needed for search ***
         Translate the state into a string.  Could be used as for a hash table...
         :return: A string that describes the current state.
         """
-        return self.gameState
+        return self.state
 
     def validSpaces(self):
         """
@@ -47,30 +47,30 @@ class Pawned:
             currentLocations = list(zip(*np.where(board == "w")))
             for coord in currentLocations:
                 # forward one
-                if board[coord[0]-1][coord[1]] == ".":
-                    validSpaces.append(((coord[0], coord[1]), (coord[0]-1, coord[1])))
+                if board[coord[0] - 1][coord[1]] == ".":
+                    validSpaces.append(((coord[0], coord[1]), (coord[0] - 1, coord[1])))
                 # diagonal attack to right
-                if coord[1]+1 < 6:
-                    if board[coord[0]-1][coord[1]+1] == "b":
-                        validSpaces.append(((coord[0], coord[1]), (coord[0]-1, coord[1]+1)))
+                if coord[1] + 1 < 6:
+                    if board[coord[0] - 1][coord[1] + 1] == "b":
+                        validSpaces.append(((coord[0], coord[1]), (coord[0] - 1, coord[1] + 1)))
                 # diagonal attack to left
-                if coord[1]-1 > -1:
-                    if board[coord[0]-1][coord[1]-1] == "b":
-                        validSpaces.append(((coord[0], coord[1]), (coord[0]-1, coord[1]-1)))
+                if coord[1] - 1 > -1:
+                    if board[coord[0] - 1][coord[1] - 1] == "b":
+                        validSpaces.append(((coord[0], coord[1]), (coord[0] - 1, coord[1] - 1)))
         else:
             currentLocations = list(zip(*np.where(board == "b")))
             for coord in currentLocations:
                 # forward one
-                if board[coord[0]+1][coord[1]] == ".":
-                    validSpaces.append(((coord[0], coord[1]), (coord[0]+1, coord[1])))
+                if board[coord[0] + 1][coord[1]] == ".":
+                    validSpaces.append(((coord[0], coord[1]), (coord[0] + 1, coord[1])))
                 # diagonal attack to right
-                if coord[1]+1 < 6:
-                    if board[coord[0]+1][coord[1]+1] == "w":
-                        validSpaces.append(((coord[0], coord[1]), (coord[0]+1, coord[1]+1)))
+                if coord[1] + 1 < 6:
+                    if board[coord[0] + 1][coord[1] + 1] == "w":
+                        validSpaces.append(((coord[0], coord[1]), (coord[0] + 1, coord[1] + 1)))
                 # diagonal attack to left
-                if coord[1]-1 > -1:
-                    if board[coord[0]+1][coord[1]-1] == "w":
-                        validSpaces.append(((coord[0], coord[1]), (coord[0]+1, coord[1]-1)))
+                if coord[1] - 1 > -1:
+                    if board[coord[0] + 1][coord[1] - 1] == "w":
+                        validSpaces.append(((coord[0], coord[1]), (coord[0] + 1, coord[1] - 1)))
         return validSpaces
 
     def pieceLocations(self, board, color):
@@ -84,14 +84,14 @@ class Pawned:
         :param who: who moved there
         returns the resulting board of the given move
         """
-
         board = self.state.getBoard().copy()
-        # the coordinate you are moving to gets the value of the coordinate you are moving from
-        board[where[0]][where[1]] = board[who[0]][who[1]]
         # set the value you are moving from to .
         board[who[0]][who[1]] = "."
-        return (who, where), State(board, self.togglePlayer(self.state.getPlayer()))
+        # the coordinate you are moving to gets the value of the coordinate you are moving from
+        board[where[0]][where[1]] = self.state.getPlayer().lower()
+        s = State(board, self.togglePlayer(self.state.getPlayer()))
 
+        return (who, where), s
 
     def isMinNode(self):
         """ *** needed for search ***
@@ -99,13 +99,11 @@ class Pawned:
         """
         return self.state.getPlayer() == human
 
-
     def isMaxNode(self):
         """ *** needed for search ***
         :return: True if it's Max's turn to play
         """
         return self.state.getPlayer() == AI
-
 
     def winFor(self, state, color):
         """ *** needed for search ***
@@ -122,24 +120,30 @@ class Pawned:
                 return True
         return False
 
-
     def isTerminal(self):
         """ *** needed for search ***
         :param node: a game tree node with stored game state
         :return: a boolean indicating if node is terminal
         """
-        return self.winFor(self.state, 'b') or self.winFor(self.state, 'w') or (len(self.validSpaces()) == 0)
-
+        s = State(self.state.getBoard(), self.togglePlayer(self.state.getPlayer()))
+        p = Pawned(s)
+        return self.winFor(self.state, 'b') or self.winFor(self.state, 'w') or (len(self.validSpaces()) == 0 and len(p.validSpaces()) == 0)
 
     def successors(self):
         """ *** needed for search ***
         :param node:  a game tree node with stored game state
         :return: a list of move,state pairs that are the next possible states
         """
-        spaces = self.validSpaces()
-        states = list(map(lambda v: self.move(v[0], v[1]), spaces))
 
-        nodes = [(m, Pawned(s)) for m,s in states]
+        spaces = self.validSpaces()
+        if spaces:
+            states = list(map(lambda v: self.move(v[0], v[1]), spaces))
+            nodes = [(m, Pawned(s)) for m, s in states]
+        else:
+            print("Pass")
+            s = State(self.state.getBoard(),self.togglePlayer(self.state.getPlayer()))
+            piece = self.pieceLocations(self.state.getBoard(),self.state.getPlayer().lower())
+            nodes = [((piece[0], piece[0]), Pawned(s))]
         return nodes
 
     def togglePlayer(self, player):
@@ -152,14 +156,17 @@ class Pawned:
         """ *** needed for search ***
         :return: 1 if win for X, -1 for win for O, 0 for draw
         """
-        if self.winFor(self.state, "w"):
-            return 1
-        if self.winFor(self.state, "b"):
+        if self.winFor(self.state, human.lower()):
             return -1
+        if self.winFor(self.state, AI.lower()):
+            return 1
         if len(self.validSpaces()) == 0:
             return 0
 
     # all remaining methods are to assist in the calculatiosn
+
+    def setState(self, state):
+        self.state = state
 
     def display(self):
         """
@@ -167,4 +174,10 @@ class Pawned:
         :return: nothing
         """
         # prints the entire board in one print statement, row by row
-        print('\n'.join([''.join(['{:5}'.format(item) for item in row]) for row in self.gameState.getBoard()]))
+        s = "    "
+        for i in range(len(self.state.getBoard())):
+            s += str(i) + "   "
+        print(s)
+        for i, j in enumerate(self.state.getBoard()):
+            print(i, j)
+
