@@ -18,7 +18,7 @@ class TicTacToe:
             self.gameState = dict()
             for r in range(1,4):
                  for c in range(1,4):
-                    self.gameState[r,c] = ' '
+                    self.gameState[r,c] = '.'
         else:
             self.gameState = state
         self.whoseTurn = player

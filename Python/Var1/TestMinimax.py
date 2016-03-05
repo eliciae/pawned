@@ -1,14 +1,15 @@
-"""
-from a2.Python.Var1.GameTreeSearch import minimax
-from a2.Python.Var1.TTTT import TicTacToe
+
+from Python.Var1.GameTreeSearch import minimax
+from Python.Var1.TTTT import TicTacToe
 
 a = TicTacToe(None)
-minimax(a)
+print(a.str())
+#minimax(a)
 """
-from a2.Python.Var2 import Pawned
+from Python.Var2 import Pawned
 import numpy as np
-from a2.Python.Var1.GameTreeSearch import minimax
-from a2.Python.Var2.State import State
+from Python.Var1.GameTreeSearch import minimax
+from Python.Var2.State import State
 
 '''
 a = Pawned.Pawned(None)
@@ -78,3 +79,4 @@ for s in more:
     print(s.getBoard())
     print(a.isTerminal(s))
 '''
+"""

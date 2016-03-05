@@ -23,10 +23,10 @@ class Pawned:
         :return:
         """
         if state is None:
-            self.gameState = State(None, None)
+            self.state = State(None, None)
         else:
-            self.gameState = state
-        self.display()
+            self.state = state
+
 
 
     def str(self):
@@ -36,13 +36,13 @@ class Pawned:
         """
         return self.gameState
 
-    def validSpaces(self, state):
+    def validSpaces(self):
         """
         returns a list of tuples (the start and end coord pair) of tuples (the row and col values)
         """
         validSpaces = []
-        player = state.getPlayer()
-        board = state.getBoard()
+        player = self.state.getPlayer()
+        board = self.state.getBoard()
         if player == "W":
             currentLocations = list(zip(*np.where(board == "w")))
             for coord in currentLocations:
@@ -77,34 +77,34 @@ class Pawned:
         # get the piece type to look for and return all locations
         return list(zip(*np.where(board == color)))
 
-
-    def move(self, who, where, state):
+    def move(self, who, where):
         """
         Create a new board with the given move.
         :param where: Where the move was
         :param who: who moved there
         returns the resulting board of the given move
         """
-        board = state.getBoard().copy()
+
+        board = self.state.getBoard().copy()
         # the coordinate you are moving to gets the value of the coordinate you are moving from
         board[where[0]][where[1]] = board[who[0]][who[1]]
         # set the value you are moving from to .
         board[who[0]][who[1]] = "."
-        return State(board, self.togglePlayer(state.getPlayer()))
+        return (who, where), State(board, self.togglePlayer(self.state.getPlayer()))
 
 
-    def isMinNode(self, state):
+    def isMinNode(self):
         """ *** needed for search ***
         :return: True if it's Min's turn to play
         """
-        return state.getPlayer() == human
+        return self.state.getPlayer() == human
 
 
-    def isMaxNode(self, state):
+    def isMaxNode(self):
         """ *** needed for search ***
         :return: True if it's Max's turn to play
         """
-        return state.getPlayer() == AI
+        return self.state.getPlayer() == AI
 
 
     def winFor(self, state, color):
@@ -123,22 +123,24 @@ class Pawned:
         return False
 
 
-    def isTerminal(self, state):
+    def isTerminal(self):
         """ *** needed for search ***
         :param node: a game tree node with stored game state
         :return: a boolean indicating if node is terminal
         """
-        return self.winFor(state, 'b') or self.winFor(state, 'w') or (len(self.validSpaces(state)) == 0)
+        return self.winFor(self.state, 'b') or self.winFor(self.state, 'w') or (len(self.validSpaces()) == 0)
 
 
-    def successors(self, state):
+    def successors(self):
         """ *** needed for search ***
         :param node:  a game tree node with stored game state
         :return: a list of move,state pairs that are the next possible states
         """
-        spaces = self.validSpaces(state)
-        states = list(map(lambda v: self.move(v[0], v[1], state), spaces))
-        return states
+        spaces = self.validSpaces()
+        states = list(map(lambda v: self.move(v[0], v[1]), spaces))
+
+        nodes = [(m, Pawned(s)) for m,s in states]
+        return nodes
 
     def togglePlayer(self, player):
         if player == "B":
@@ -146,21 +148,18 @@ class Pawned:
         else:
             return "B"
 
-
-    def utility(self, state):
+    def utility(self):
         """ *** needed for search ***
         :return: 1 if win for X, -1 for win for O, 0 for draw
         """
-        if self.winFor(state, "w"):
+        if self.winFor(self.state, "w"):
             return 1
-        if self.winFor(state, "b"):
+        if self.winFor(self.state, "b"):
             return -1
-        if len(self.validSpaces(state)) == 0:
+        if len(self.validSpaces()) == 0:
             return 0
 
-
     # all remaining methods are to assist in the calculatiosn
-
 
     def display(self):
         """

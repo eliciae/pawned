@@ -14,8 +14,6 @@ class State:
                 self.board[0][i] = "b"
                 # white across bottom
                 self.board[5][i] = "w"
-
-
         else:
             self.board = board
         if player is None:
@@ -23,6 +21,11 @@ class State:
             self.player = "B"
         else:
             self.player = player
+
+    def __str__(self):
+        return "(%s, %s)" % (self.board, self.player)
+
+    __repr__ = __str__
 
     def getBoard(self):
         return self.board
