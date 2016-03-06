@@ -126,8 +126,8 @@ class Pawned:
         :return: a boolean indicating if node is terminal
         """
         s = State(self.state.getBoard(), self.togglePlayer(self.state.getPlayer()))
-        p = Pawned(s)
-        return self.winFor(self.state, 'b') or self.winFor(self.state, 'w') or (len(self.validSpaces()) == 0 and len(p.validSpaces()) == 0)
+        pi = Pawned(s)
+        return self.winFor(self.state, 'b') or self.winFor(self.state, 'w') or (len(self.validSpaces()) == 0 and len(pi.validSpaces()) == 0)
 
     def successors(self):
         """ *** needed for search ***
@@ -140,10 +140,8 @@ class Pawned:
             states = list(map(lambda v: self.move(v[0], v[1]), spaces))
             nodes = [(m, Pawned(s)) for m, s in states]
         else:
-            print("Pass")
             s = State(self.state.getBoard(),self.togglePlayer(self.state.getPlayer()))
-            piece = self.pieceLocations(self.state.getBoard(),self.state.getPlayer().lower())
-            nodes = [((piece[0], piece[0]), Pawned(s))]
+            nodes = [((None, None), Pawned(s))]
         return nodes
 
     def togglePlayer(self, player):
@@ -157,11 +155,12 @@ class Pawned:
         :return: 1 if win for X, -1 for win for O, 0 for draw
         """
         if self.winFor(self.state, human.lower()):
-            return -1
+            return -10
         if self.winFor(self.state, AI.lower()):
-            return 1
+            return 10
         if len(self.validSpaces()) == 0:
             return 0
+        return len(self.pieceLocations(self.state.getBoard(), AI.lower())) - len(self.pieceLocations(self.state.getBoard(), human.lower()))
 
     # all remaining methods are to assist in the calculatiosn
 

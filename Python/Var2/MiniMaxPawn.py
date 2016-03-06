@@ -5,7 +5,7 @@
 from a2.Python.Var2.Pawned import Pawned
 transpositionTable = dict()
 
-def minimax(node):
+def minimax(node, depth):
     """
     :param node:  a Game object responding to the following methods:
         str(): return a unique string describing the state of the game (for use in hash table)
@@ -17,16 +17,18 @@ def minimax(node):
     :return: a pair, u,m consisting of the minimax utility, and a move that obtains it
     """
     global transpositionTable
-    s = str(node)
+    s = node.str()
 
     if s in transpositionTable:
         return transpositionTable[s]
     elif node.isTerminal():
         u = node.utility()
         m = None
+    elif depth >= 8:
+        u = node.utility()
+        m = None
     else:
-
-        vs = [(minimax(c)[0],m) for (m,c) in node.successors()]  # strip off the move returned by minimax!
+        vs = [(minimax(c, depth + 1)[0],m) for (m,c) in node.successors()]  # strip off the move returned by minimax!
         if node.isMaxNode():
             u,m = argmax(vs)
         elif node.isMinNode():
