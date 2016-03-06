@@ -24,7 +24,7 @@ def minimax(node, depth):
     elif node.isTerminal():
         u = node.utility()
         m = None
-    elif depth >= 8:
+    elif depth >= 6:
         u = node.utility()
         m = None
     else:
@@ -63,4 +63,10 @@ def argmin(ns):
         if v < minv:
             minv,minm = v,m
     return minv,minm
+
+
+def getTran():
+        return len(transpositionTable)
+
+
 

@@ -2,8 +2,8 @@ from a2.Python.Var2.State import State
 import numpy as np
 
 tree = dict()
-AI = "B"
-human = "W"
+AI = "W"
+human = "B"
 
 
 class Pawned:
@@ -155,14 +155,17 @@ class Pawned:
         :return: 1 if win for X, -1 for win for O, 0 for draw
         """
         if self.winFor(self.state, human.lower()):
-            return -10
+            return -100
         if self.winFor(self.state, AI.lower()):
-            return 10
+            return 100
         if len(self.validSpaces()) == 0:
             return 0
-        return len(self.pieceLocations(self.state.getBoard(), AI.lower())) - len(self.pieceLocations(self.state.getBoard(), human.lower()))
 
+        return self.heuristic() + self.pieceCount()
     # all remaining methods are to assist in the calculatiosn
+
+    def pieceCount(self):
+        return (len(self.pieceLocations(self.state.getBoard(), AI.lower())) - len(self.pieceLocations(self.state.getBoard(), human.lower()))) * 2
 
     def setState(self, state):
         self.state = state
@@ -180,3 +183,42 @@ class Pawned:
         for i, j in enumerate(self.state.getBoard()):
             print(i, j)
 
+
+    def heuristic(self):
+        # this is the player who moves into this state
+        player = self.togglePlayer(self.state.getPlayer())
+        board = self.state.getBoard()
+        pieces = self.pieceLocations(board, player.lower())
+        # opposingPieces = self.pieceLocations(board, self.togglePlayer(player).lower())
+        moveby = 1
+        boardValue = 0
+        if player == "W":
+            moveby = -1
+        for p in pieces:
+            boardValue += self.countSupportingPieces(p, moveby, board, player)
+            boardValue -= self.countThreatPieces(p, moveby, board, player)
+
+        if player == human:
+            boardValue = boardValue * -1
+
+        return boardValue
+
+    def countSupportingPieces(self, piece, moveby, board, player):
+        row = piece[0]
+        col = piece[1]
+        left = col - 1
+        right = col + 1
+        supportCount = 0
+        if self.legalCoord(row - moveby, right):
+            if board[row - moveby][right] == player.lower():
+                supportCount += 1
+        if self.legalCoord(row - moveby, left):
+            if board[row - moveby][left] == player.lower():
+                supportCount += 1
+        return supportCount
+
+    def countThreatPieces(self, piece, moveby, board, player):
+        return self.countSupportingPieces(piece, moveby * -1, board, self.togglePlayer(player))
+
+    def legalCoord(self, row, col):
+        return 6 > row > -1 and 6 > col > -1
