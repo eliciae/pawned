@@ -1,6 +1,6 @@
-from a2.Python.Var2.Pawned import Pawned
-from a2.Python.Var2.MiniMaxPawnAB import AlphaBeta
-from a2.Python.Var2.State import State
+from pawned.Python.Var2.Pawned import Pawned
+from pawned.Python.Var2.MiniMaxPawnAB import AlphaBeta
+from pawned.Python.Var2.State import State
 import numpy as np
 
 board = np.array([["." for x in range(6)] for x in range(6)], str)

@@ -2,7 +2,7 @@
 # reach a given game state.  The transposition table is a dictionary (hash table) that remembers if
 # a game state was seen before, and it it was, what its minimax value is.
 # Warning: The transposition table can fill up quickly!
-from a2.Python.Var2.Pawned import Pawned
+from pawned.Python.Var2.Pawned import Pawned
 transpositionTable = dict()
 
 def minimax(node, depth):

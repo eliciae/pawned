@@ -1,5 +1,6 @@
-from a2.Python.Var2.State import State
+from pawned.Python.Var2.State import State
 import numpy as np
+import networkx as nx
 
 tree = dict()
 AI = "W"
@@ -189,6 +190,7 @@ class Pawned:
         player = self.togglePlayer(self.state.getPlayer())
         board = self.state.getBoard()
         pieces = self.pieceLocations(board, player.lower())
+
         # opposingPieces = self.pieceLocations(board, self.togglePlayer(player).lower())
         moveby = 1
         boardValue = 0
@@ -197,6 +199,9 @@ class Pawned:
         for p in pieces:
             boardValue += self.countSupportingPieces(p, moveby, board, player)
             boardValue -= self.countThreatPieces(p, moveby, board, player)
+
+
+        boardValue -= self.calculateAverageDistanceToGoal(pieces, moveby, board, player)
 
         if player == human:
             boardValue = boardValue * -1
@@ -219,6 +224,20 @@ class Pawned:
 
     def countThreatPieces(self, piece, moveby, board, player):
         return self.countSupportingPieces(piece, moveby * -1, board, self.togglePlayer(player))
+
+    def calculateAverageDistanceToGoal(self, piece, moveby, board, player):
+        totalDistanceLeft = 0
+        goalRow = 5
+        if(player.lower() == "w"):
+            goalRow = 0
+
+        for p in piece:
+            totalDistanceLeft += abs(p[0] - goalRow)
+
+        totalDistanceLeft /= len(piece)
+        #print("Average Distance left: {0}" .format(totalDistanceLeft))
+
+        return totalDistanceLeft
 
     def legalCoord(self, row, col):
         return 6 > row > -1 and 6 > col > -1
